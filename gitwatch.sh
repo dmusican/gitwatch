@@ -127,11 +127,12 @@ done
 unset cmd
 
 # Expand the path to the target to absolute path
-IN=$(readlink -f "$1")
+IN=$(greadlink -f "$1")
 
 if [ -d $1 ]; then # if the target is a directory
     TARGETDIR=$(sed -e "s/\/*$//" <<<"$IN") # dir to CD into before using git commands: trim trailing slash, if any
-    INCOMMAND="$INW --exclude=\"^${TARGETDIR}/.git\" -qqr -e close_write,move,delete,create $TARGETDIR" # construct inotifywait-commandline
+#    INCOMMAND="$INW --exclude=\"^${TARGETDIR}/.git\" -qqr -e close_write,move,delete,create $TARGETDIR" # construct inotifywait-commandline
+    INCOMMAND="$INW -1 --exclude="^${TARGETDIR}/.git" --event Created --event Removed --event Updated --event Renamed --event MovedFrom --event MovedTo $TARGETDIR" # Updated version to work with fswatch
     GIT_ADD_ARGS="." # add "." (CWD) recursively to index
     GIT_COMMIT_ARGS="-a" # add -a switch to "commit" call just to be sure
 elif [ -f $1 ]; then # if the target is a single file
